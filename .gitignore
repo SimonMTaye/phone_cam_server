@@ -1,2 +1,6 @@
 .vscode
 venv
+*.pyd
+build
+*.egg-info
+src/*/__pycache__
