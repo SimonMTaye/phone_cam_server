@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from threading import Thread
 
-from pyvirtualcam import Camera
+from camera.camera import Camera
 from numpy import ndarray
 
 
 class Source(ABC):
     def __init__(
-        self, *, width: int = 1280, height: int = 720, fps: float = 30
+        self, *, width: int = 1280, height: int = 720, fps: int = 24
     ) -> None:
         super().__init__()
         self._width = width
@@ -16,7 +16,7 @@ class Source(ABC):
         self._keep_cam_running = True
 
     @property
-    def fps(self) -> float:
+    def fps(self) -> int:
         return self._fps
 
     @property
@@ -32,15 +32,11 @@ class Source(ABC):
         pass
 
     def send_frames(self):
-        i = 1
-        with Camera(self.width, self.height, self.fps, 0) as cam:
+        with Camera(self.width, self.height, self.fps) as cam:
             while self._keep_cam_running:
                 frame = self.get_frame()
-                print(frame.shape)
-                print(self.width)
-                print(self.height)
                 cam.send(frame)
-                cam.sleep_until_next_frame()
+                cam.wait_for_next_frame()
 
     def start(self):
         self._keep_cam_running = True
