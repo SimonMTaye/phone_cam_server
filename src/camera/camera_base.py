@@ -18,7 +18,7 @@ class CameraBase(AbstractContextManager):
         sleep(1 / self.fps)
 
     @abstractmethod
-    def send(self, frame: ndarray):
+    def send(self, frame: ndarray, *, changed=True):
         assert frame.shape == (self.height, self.width, 4)
         pass
 
