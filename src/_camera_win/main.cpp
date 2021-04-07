@@ -9,6 +9,21 @@ HANDLE fileHandle = NULL;
 LPCSTR mutexName = "Global\\PlayoutXVCammutex";
 LPCSTR fileHandleName = "PlayoutXVCam";
 
+uint8_t *processIntoFrame(uint8_t *data, int pixelnum)
+{
+    int bufSize = pixelnum * 4;
+    uint8_t *frame = (uint8_t *)malloc(bufSize);
+    CopyMemory(frame, data, bufSize);
+    for (size_t i = 0; i < pixelnum; i++)
+    {
+        uint8_t r = frame[i * 4];
+        uint8_t b = frame[(i * 4) + 2];
+        frame[i * 4] = b;
+        frame[(i * 4) + 2] = r;
+    }
+    return frame;
+}
+
 int sendFrame(long frameIndex, int fps, int width, int height, py::array_t<uint8_t, py::array::c_style> data)
 {
     py::buffer_info buf = data.request();
@@ -17,7 +32,7 @@ int sendFrame(long frameIndex, int fps, int width, int height, py::array_t<uint8
         throw std::runtime_error("Given data doesn't represent a well-formed frame");
     }
 
-    uint8_t *frame = (uint8_t *)buf.ptr;
+    uint8_t *frame = processIntoFrame((uint8_t *)buf.ptr, width * height);
     int bufferSize = width * height * 4;
     int fileSize = (sizeof(int) * 4) + sizeof(long) + bufferSize;
     LARGE_INTEGER memSize;
@@ -45,10 +60,10 @@ int sendFrame(long frameIndex, int fps, int width, int height, py::array_t<uint8
     // Get a pointer to the shared memmory and copy the image
     void *fileView = MapViewOfFile(fileHandle, FILE_MAP_ALL_ACCESS, 0, 0, 0);
     CopyMemory(fileView, &frameIndex, sizeof(long));
-    CopyMemory((byte *)fileView + 8, &fps, sizeof(long));
-    CopyMemory((byte *)fileView + 12, &width, sizeof(long));
-    CopyMemory((byte *)fileView + 16, &height, sizeof(long));
-    CopyMemory((byte *)fileView + 20, &bufferSize, sizeof(long));
+    CopyMemory((byte *)fileView + 8, &fps, sizeof(int));
+    CopyMemory((byte *)fileView + 12, &width, sizeof(int));
+    CopyMemory((byte *)fileView + 16, &height, sizeof(int));
+    CopyMemory((byte *)fileView + 20, &bufferSize, sizeof(int));
     CopyMemory((byte *)fileView + 24, frame, bufferSize);
 
     FlushViewOfFile(fileView, fileSize);
