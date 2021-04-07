@@ -1,19 +1,26 @@
 from abc import ABC, abstractmethod
 from threading import Thread
+from time import sleep
 
-from camera.camera import Camera
 from numpy import ndarray
 
+from camera.camera import Camera
+from camera.camera_base import CameraBase
 
-class Source(ABC):
-    def __init__(
-        self, *, width: int = 1280, height: int = 720, fps: int = 24
-    ) -> None:
+
+class AbstractSource(ABC):
+
+    _keep_cam_running = True
+    _frame_changed = True
+
+    def __init__(self, *, width: int = 1280, height: int = 720, fps: int = 24) -> None:
         super().__init__()
         self._width = width
         self._height = height
         self._fps = fps
-        self._keep_cam_running = True
+        self._output_thread = Thread(
+        None, name="Virtual Cam Data thread", target=self.send_frames, daemon=True
+    )
 
     @property
     def fps(self) -> int:
@@ -35,16 +42,16 @@ class Source(ABC):
         with Camera(self.width, self.height, self.fps) as cam:
             while self._keep_cam_running:
                 frame = self.get_frame()
-                cam.send(frame)
-                cam.wait_for_next_frame()
+                cam.send(frame) 
+                self.wait_for_next_frame()
+    
+    def wait_for_next_frame(self):
+        sleep(1 / self.fps)
 
     def start(self):
         self._keep_cam_running = True
-        self._thread = Thread(
-            None, name="Virtual Cam Data thread", target=self.send_frames, daemon=True
-        )
-        self._thread.start()
+        self._output_thread.start()
 
     def stop(self):
         self._keep_cam_running = False
-        self._thread.join()
+        self._output_thread.join()
