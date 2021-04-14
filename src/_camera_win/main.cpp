@@ -71,6 +71,7 @@ int sendFrame(long frameIndex, int fps, int width, int height, py::array_t<uint8
 
     ReleaseMutex(fileMutex);
     CloseHandle(fileMutex);
+    free(frame);
 
     return 0;
 }
