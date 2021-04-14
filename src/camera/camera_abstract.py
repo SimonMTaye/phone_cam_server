@@ -4,7 +4,7 @@ from numpy import ndarray
 from contextlib import AbstractContextManager
 
 
-class CameraBase(AbstractContextManager):
+class AbstractCamera(AbstractContextManager):
     def __init__(self, width: int, height: int, fps: int = 24) -> None:
         self.width = width
         self.height = height

@@ -2,10 +2,11 @@ from typing import Optional
 import camera_win
 from numpy import ndarray, zeros, uint8
 
-from .camera_base import CameraBase
+from camera.camera_abstract import AbstractCamera
 
 
-class WindowsCamera(CameraBase):
+#TODO deal with integer overflow in frame index
+class WindowsCamera(AbstractCamera):
     def __init__(self, width: int, height: int, fps: int) -> None:
         super().__init__(width, height, fps=fps)
         self._cam = camera_win
@@ -16,9 +17,7 @@ class WindowsCamera(CameraBase):
         self._cam.close()
 
     def send(self, frame: ndarray):
-        self.height = frame.shape[0]
-        self.width = frame.shape[1]
-        # super().send(frame)
+        super().send(frame)
         self._frame_index += 1
         # val is the returned error code from C++ code. Used for debugging. Can be removed
         self._cam.send(
