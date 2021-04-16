@@ -11,7 +11,7 @@ class ImageQue:
 
     _list_lock = Lock()
 
-    def __init__(self, max_size: int = 3, *, width=1920, height=1080) -> None:
+    def __init__(self, width, height, max_size: int = 3) -> None:
         self._list = []
         self._max_size = max_size
         self._img_height = height
