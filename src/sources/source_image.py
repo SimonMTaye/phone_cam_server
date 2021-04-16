@@ -9,7 +9,6 @@ from sources.factory import FactoryMixin, ParamInfo
 
 class ImageFileSource(AbstractSource, FactoryMixin):
     
-    
     def __init__(self) -> None:
         super().__init__()
         self.__image_data: Optional[ndarray] = None
@@ -31,11 +30,7 @@ class ImageFileSource(AbstractSource, FactoryMixin):
         return {"path": ParamInfo(str, "Path to image file", True)}
     
     @staticmethod
-    def create(**kwargs) -> "ImageFileSource":
-        try:
-            path = kwargs["path"]
-            source = ImageFileSource()
-            source.read_image(path)
-            return source
-        except KeyError:
-            raise ValueError("Required function parameters not passed")
+    def create(*, path: str) -> "ImageFileSource":
+        source = ImageFileSource()
+        source.read_image(path)
+        return source

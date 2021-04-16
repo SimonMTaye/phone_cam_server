@@ -50,19 +50,12 @@ class HttpClientSource(AbstractQueSource, FactoryMixin):
         self._client_thread.start()
 
     @staticmethod
-    def create(**kwargs) -> "HttpClientSource":
-        try:
-            url = kwargs["url"]
-            sleep_duration = kwargs["sleep_duration"]
-            port = kwargs.get("port", 80)
-            endpoint = kwargs.get("endpoint", None)
-            source = HttpClientSource()
-            source.set_url_and_port(url, port, endpoint)
-            source.sleep_duration = sleep_duration
-            source.run_http_client()
-            return source
-        except KeyError:
-            raise ValueError("Required parameters not passed")
+    def create(*, url, port: int = 80, endpoint: Optional[str] = None, sleep_duration:float) -> "HttpClientSource":
+        source = HttpClientSource()
+        source.set_url_and_port(url, port, endpoint)
+        source.sleep_duration = sleep_duration
+        source.run_http_client()
+        return source
 
     @staticmethod
     def parameters() -> Dict[str, ParamInfo]:

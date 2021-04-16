@@ -19,7 +19,7 @@ class HttpServerSource(AbstractQueSource, FactoryMixin):
         self.port: Optional[int]
         
 
-    def set_url_and_port(self, url: str, port: int, endpoint: str = "/frame"):
+    def set_url_and_port(self, url: str, port: int, endpoint: str = "/"):
         self.url = url
         self.port = port
         self.endpoint = endpoint
@@ -69,14 +69,8 @@ class HttpServerSource(AbstractQueSource, FactoryMixin):
             }
 
     @staticmethod
-    def create(**kwargs) -> "HttpServerSource":
-        try:
-            url = kwargs["url"]
-            port = kwargs["port"]
-            endpoint = kwargs.get("endpoint", "/frame")
-            source = HttpServerSource()
-            source.set_url_and_port(url, port, endpoint)
-            source.run_server()
-            return source
-        except KeyError:
-            raise ValueError("Required function parameters not passed")
+    def create(*, url, port, endpoint: str = "/") -> "HttpServerSource":
+        source = HttpServerSource()
+        source.set_url_and_port(url, port, endpoint)
+        source.run_server()
+        return source
