@@ -4,10 +4,10 @@ from numpy import ndarray
 from camera.camera_abstract import AbstractCamera
 
 
-# TODO deal with integer overflow in frame index
+# FIXME deal with integer overflow in frame index
 class WindowsCamera(AbstractCamera):
     def __init__(self, width: int, height: int, fps: int) -> None:
-        super().__init__(width, height, fps=fps)
+        super().__init__(width, height, fps)
         self._cam = camera_win
         self._frame_index = 0
 

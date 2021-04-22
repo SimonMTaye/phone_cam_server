@@ -3,6 +3,7 @@ from typing import Optional
 from numpy import ndarray
 from contextlib import AbstractContextManager
 
+#TODO Consider if if AbstractCamera should know about "fps"
 
 class AbstractCamera(AbstractContextManager):
     def __init__(self, width: int, height: int, fps: int = 24) -> None:
