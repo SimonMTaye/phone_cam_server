@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict 
+from typing import Dict
 
 from sources.source_abstract import AbstractSource
 from collections import namedtuple
@@ -10,7 +10,6 @@ ParamInfo = namedtuple("Param", ["type", "description", "required"])
 
 # Used as a mixin class
 class FactoryMixin(ABC):
-
     @staticmethod
     @abstractmethod
     def create(**kwargs) -> AbstractSource:
@@ -20,8 +19,3 @@ class FactoryMixin(ABC):
     @abstractmethod
     def parameters() -> Dict[str, ParamInfo]:
         return NotImplementedError()
-
-
-        
-    
-        

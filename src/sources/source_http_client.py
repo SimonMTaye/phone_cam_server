@@ -1,6 +1,7 @@
 from threading import Thread
-from time import sleep 
+from time import sleep
 from typing import Any, Dict, Optional
+from PIL import UnidentifiedImageError
 
 from requests import get, exceptions
 
@@ -25,12 +26,15 @@ class HttpClientSource(AbstractQueSource, FactoryMixin):
 
     def handle_image(self, data: Any):
         if not self.ready:
-            img = get_image_object(data)
+            try:
+                img = get_image_object(data)
+            except UnidentifiedImageError:
+                return
             res = get_image_resolution(img)
-            self.__height = res[1]
-            self.__width = res[0]
+            self._height = res[1]
+            self._width = res[0]
             self.init_que()
-        self.__image_que.queue(data)
+        self._image_que.queue(data)
 
     def get_images_from_server(self):
         while True:
@@ -39,7 +43,7 @@ class HttpClientSource(AbstractQueSource, FactoryMixin):
                 url += self.endpoint
             try:
                 r = get(url)
-                self.__image_que.queue(r.content)
+                self.handle_image(r.content)
             except exceptions.ConnectionError as e:
                 print("Connection to device failed")
                 print(e)
@@ -50,7 +54,13 @@ class HttpClientSource(AbstractQueSource, FactoryMixin):
         self._client_thread.start()
 
     @staticmethod
-    def create(*, url, port: int = 80, endpoint: Optional[str] = None, sleep_duration:float) -> "HttpClientSource":
+    def create(
+        *,
+        url,
+        port: int = 80,
+        endpoint: Optional[str] = None,
+        sleep_duration: float = 1 / 24,
+    ) -> "HttpClientSource":
         source = HttpClientSource()
         source.set_url_and_port(url, port, endpoint)
         source.sleep_duration = sleep_duration
@@ -62,7 +72,7 @@ class HttpClientSource(AbstractQueSource, FactoryMixin):
         return {
             "url": ParamInfo(str, "Url for image server", True),
             "sleep_duration": ParamInfo(
-                float, "Delay between querying the server for images", True
+                float, "Delay between querying the server for images", False
             ),
             "port": ParamInfo(int, "Image server port", False),
             "endpoint": ParamInfo(str, "Endpoint for image server", False),

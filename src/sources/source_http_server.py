@@ -17,7 +17,6 @@ class HttpServerSource(AbstractQueSource, FactoryMixin):
         self.url: Optional[str]
         self.endpoint: Optional[str]
         self.port: Optional[int]
-        
 
     def set_url_and_port(self, url: str, port: int, endpoint: str = "/"):
         self.url = url
@@ -28,20 +27,20 @@ class HttpServerSource(AbstractQueSource, FactoryMixin):
         if self.url is None or self.port is None or self.endpoint is None:
             raise AttributeError("Server information must be set before running it")
         app = self.get_app()
-        app.run(self.url, self.port, debug=False, load_dotenv=True)
+        app.run(self.url, self.port, debug=False)
 
     def recieved_frame(self, data: Any):
         if not self.ready:
             try:
                 img = get_image_object(data)
                 res = get_image_resolution(img)
-                self.__width = res[0]
-                self.__height = res[1]
+                self._width = res[0]
+                self._height = res[1]
                 self.init_que()
             except (UnidentifiedImageError, OSError) as e:
                 print(e)
                 return
-        self.__image_que.queue(data)
+        self._image_que.queue(data)
 
     def get_app(self) -> Flask:
         app = Flask(__name__)
@@ -61,16 +60,16 @@ class HttpServerSource(AbstractQueSource, FactoryMixin):
         return app
 
     @staticmethod
-    def parameters()-> Dict[str, ParamInfo]:
+    def parameters() -> Dict[str, ParamInfo]:
         return {
-            "url": ParamInfo(str, "Server url", True), 
-            "port": ParamInfo(int, "Server port", True), 
-            "endpoint": ParamInfo(str, "Endpoint for getting images", False)
-            }
+            "url": ParamInfo(str, "Server url", True),
+            "port": ParamInfo(int, "Server port", True),
+            "endpoint": ParamInfo(str, "Endpoint for getting images", False),
+        }
 
     @staticmethod
     def create(*, url, port, endpoint: str = "/") -> "HttpServerSource":
         source = HttpServerSource()
         source.set_url_and_port(url, port, endpoint)
-        source.run_server()
+        source._server_thread.start()
         return source

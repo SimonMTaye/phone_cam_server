@@ -3,12 +3,13 @@ from typing import Optional
 from numpy import ndarray
 
 # TODO Figure out logging
-class AbstractSource(ABC):
+# TODO Context manager for sources
 
+class AbstractSource(ABC):
     def __init__(self) -> None:
-        self.__width : Optional[int] = None
-        self.__height : Optional[int] = None
-        
+        self._width: Optional[int] = None
+        self._height: Optional[int] = None
+
     @property
     @abstractmethod
     def ready(self) -> bool:
@@ -16,15 +17,15 @@ class AbstractSource(ABC):
 
     @property
     def width(self) -> int:
-        if self.__width is None:
+        if self._width is None:
             raise AttributeError("Width was accessed before it was set")
-        return self.__width
+        return self._width
 
     @property
     def height(self) -> int:
-        if self.__height is None:
+        if self._height is None:
             raise AttributeError("Height was accessed before it was set")
-        return self.__height
+        return self._height
 
     @abstractmethod
     def get_frame(self) -> ndarray:
